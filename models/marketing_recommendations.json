@@ -1,0 +1,44 @@
+{
+  "Cluster_0_At Risk / Churning": {
+    "priority": "URGENT",
+    "actions": [
+      "Win-back campaign with special discounts",
+      "Survey to understand reasons for inactivity",
+      "Personalized 'We miss you' messaging",
+      "Time-limited exclusive offers"
+    ],
+    "channels": [
+      "Email",
+      "SMS",
+      "Direct Mail"
+    ]
+  },
+  "Cluster_1_Champions": {
+    "priority": "HIGH VALUE",
+    "actions": [
+      "Reward with exclusive offers and early access to new products",
+      "Implement loyalty program with VIP benefits",
+      "Request reviews and referrals",
+      "Personalized thank-you communications"
+    ],
+    "channels": [
+      "Email",
+      "Direct Mail",
+      "Personal Account Manager"
+    ]
+  },
+  "Cluster_2_Champions": {
+    "priority": "HIGH VALUE",
+    "actions": [
+      "Reward with exclusive offers and early access to new products",
+      "Implement loyalty program with VIP benefits",
+      "Request reviews and referrals",
+      "Personalized thank-you communications"
+    ],
+    "channels": [
+      "Email",
+      "Direct Mail",
+      "Personal Account Manager"
+    ]
+  }
+}

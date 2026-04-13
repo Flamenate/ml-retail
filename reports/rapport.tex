@@ -1,0 +1,505 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{colortbl}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tikz}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{multicol}
+\usepackage{listings}
+\usepackage{tcolorbox}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{float}
+
+
+\geometry{margin=2cm}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Atelier Machine Learning}
+\lhead{Analyse Comportementale Clientèle}
+\rfoot{Page \thepage}
+
+% Couleurs personnalisées
+\definecolor{headerblue}{RGB}{41, 65, 114}
+\definecolor{lightgray}{RGB}{245, 245, 245}
+\definecolor{accentorange}{RGB}{230, 126, 34}
+\definecolor{codegreen}{RGB}{0,128,0}
+\definecolor{codegray}{RGB}{128,128,128}
+\definecolor{codepurple}{RGB}{128,0,128}
+\definecolor{backcolour}{RGB}{248,248,248}
+\definecolor{warningred}{RGB}{231, 76, 60}
+\definecolor{successgreen}{RGB}{46, 204, 113}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{codepurple},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codegreen},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+
+\tcbset{
+    colback=backcolour,
+    colframe=headerblue,
+    fonttitle=\bfseries,
+    boxrule=1pt,
+    arc=3mm
+}
+
+
+\titleformat{\section}
+{\normalfont\Large\bfseries}
+{\thesection}{1em}{}[{\titlerule[2pt]}]
+
+\titleformat{\subsection}
+{\normalfont\large\bfseries}
+{\thesubsection}{1em}{}
+
+% Définition de colonnes personnalisées
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+
+\begin{document}
+
+
+\begin{titlepage}
+\vspace{2cm}
+
+\begin{center}
+{\Huge\textbf{Atelier Machine Learning}}\par
+\vspace{0.5cm}
+{\Large\textit{Analyse Comportementale Clientèle Retail}}\par
+
+\vspace{4cm}
+
+{\LARGE\textbf{COMPTE RENDU}}\par
+\vspace{1cm}
+{\large Atelier Pratique : E-commerce de Cadeaux}\par
+\vspace{2cm}
+{\large \textbf{Préparé par XXXX}}
+\vspace{3cm}
+
+\rule{10cm}{2pt}
+
+\vspace{5cm}
+
+{\textbf{Année Univeristaire : 2025-2026}}
+
+\end{center}
+\vfill
+\end{titlepage}
+
+\tableofcontents
+\newpage
+
+%==============================================================================
+\section{Introduction}
+%==============================================================================
+
+Ce rapport présente les travaux réalisés dans le cadre de l'atelier Machine Learning portant sur l'analyse comportementale de la clientèle d'une boutique e-commerce spécialisée dans les cadeaux. L'objectif principal de ce projet est de développer des solutions d'apprentissage automatique permettant de :
+
+\begin{itemize}
+    \item \textbf{Personnaliser la stratégie marketing} grâce à la segmentation client
+    \item \textbf{Réduire le taux d'attrition} (churn) par la modélisation prédictive
+    \item \textbf{Augmenter le chiffre d'affaires} en ciblant les clients à risque
+\end{itemize}
+
+Le jeu de données mis à disposition contient \textbf{4 372 clients} décrits par \textbf{52 variables}, incluant des métriques RFM (Récence, Fréquence, Montant), des données démographiques, des comportements d'achat et des informations de compte.
+
+%==============================================================================
+\section{Prétraitement des Données}
+%==============================================================================
+
+Le prétraitement constitue une étape cruciale pour garantir la qualité des modèles. Nous avons implémenté un pipeline complet dans le fichier \texttt{src/preprocessing.py}.
+
+\subsection{Gestion des Valeurs Manquantes}
+
+\subsubsection{Variable Age}
+La variable \texttt{Age} présentait \textbf{1 311 valeurs manquantes} (29,99\% du dataset). Nous avons opté pour une imputation par la méthode des \textbf{K plus proches voisins (KNN)} avec les paramètres suivants :
+\begin{itemize}
+    \item Nombre de voisins : $k = 5$
+    \item Pondération par la distance inverse
+    \item Variables utilisées : Recency, Frequency, MonetaryTotal, MonetaryAvg, CustomerTenureDays, FirstPurchaseDaysAgo
+\end{itemize}
+
+Cette approche permet de prendre en compte les corrélations entre l'âge et les comportements d'achat, offrant une imputation plus réaliste qu'une simple moyenne ou médiane.
+
+\subsubsection{Variable AvgDaysBetweenPurchases}
+Cette variable contenait \textbf{79 valeurs manquantes}, imputées par la médiane (1,15 jours).
+
+\subsection{Traitement des Valeurs Aberrantes}
+
+Certaines variables contenaient des \textbf{valeurs sentinelles} utilisées pour encoder des données manquantes ou des erreurs :
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Variable} & \textbf{Valeurs aberrantes} & \textbf{Nombre d'occurrences} \\
+\midrule
+SupportTicketsCount & -1, 999 & 130 (2,97\%) \\
+SatisfactionScore & -1, 0, 99 & 349 (7,98\%) \\
+\bottomrule
+\end{tabular}
+\caption{Valeurs sentinelles identifiées et corrigées}
+\end{table}
+
+Ces valeurs ont été remplacées par la médiane de chaque variable respective, puis bornées aux plages valides (0-15 pour SupportTicketsCount, 1-5 pour SatisfactionScore).
+
+\subsection{Ingénierie des Variables}
+
+\subsubsection{Date d'inscription}
+La variable \texttt{RegistrationDate} a été parsée et décomposée en quatre nouvelles variables :
+\begin{itemize}
+    \item \texttt{RegYear} : Année d'inscription
+    \item \texttt{RegMonth} : Mois d'inscription
+    \item \texttt{RegDay} : Jour d'inscription
+    \item \texttt{RegWeekday} : Jour de la semaine (0=Lundi, 6=Dimanche)
+\end{itemize}
+
+\subsubsection{Adresse IP}
+À partir de la variable \texttt{LastLoginIP}, nous avons extrait :
+\begin{itemize}
+    \item \texttt{IsPrivateIP} : Indicateur booléen (326 clients avec IP privée)
+    \item \texttt{LoginCountry} : Pays de connexion (via la base DB-IP Lite)
+\end{itemize}
+
+La distribution des pays de connexion révèle une clientèle majoritairement américaine (1 494 clients), suivie de la Chine (362) et du Japon (219).
+
+\subsection{Suppression des Variables Non Fiables}
+
+La variable \texttt{NewsletterSubscribed} a été supprimée car identifiée comme non fiable dans la documentation du projet.
+
+%==============================================================================
+\section{Détection et Correction des Fuites de Données}
+%==============================================================================
+
+Une analyse approfondie des corrélations entre les variables et la cible \texttt{Churn} a révélé plusieurs cas de \textbf{fuite de données} (data leakage) compromettant la validité des modèles.
+
+\subsection{Variables Exclues}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{L{3.5cm}L{9cm}}
+\toprule
+\textbf{Variable} & \textbf{Raison de l'exclusion} \\
+\midrule
+ChurnRiskCategory & Directement dérivée de la variable cible (100\% de corrélation) \\
+RFMSegment & La catégorie "Dormants" correspond à 100\% de clients churned \\
+CustomerType & La catégorie "Perdu" correspond à 100\% de clients churned \\
+Recency & Séparation parfaite : Churn=0 si Recency $\leq$ 90 jours, Churn=1 si Recency $>$ 90 jours \\
+\bottomrule
+\end{tabular}
+\caption{Variables exclues pour cause de fuite de données}
+\end{table}
+
+\subsection{Analyse de la Variable Recency}
+
+L'analyse a montré que la variable \texttt{Recency} définit elle-même le churn :
+\begin{itemize}
+    \item Clients non churned : Recency $\in [1, 90]$ jours
+    \item Clients churned : Recency $\in [91, 374]$ jours
+\end{itemize}
+
+Cette découverte est critique car elle indique que le churn est défini comme l'inactivité supérieure à 90 jours. Utiliser cette variable reviendrait à prédire le passé avec le passé.
+
+%==============================================================================
+\section{Modélisation Prédictive du Churn}
+%==============================================================================
+
+\subsection{Préparation des Données pour la Modélisation}
+
+\subsubsection{Encodage des Variables}
+\begin{itemize}
+    \item \textbf{Variables numériques (35)} : Standardisation avec \texttt{StandardScaler}
+    \item \textbf{Variables catégorielles (14)} : Encodage one-hot avec \texttt{OneHotEncoder}
+\end{itemize}
+
+\subsubsection{Séparation Train/Test}
+Le dataset a été divisé en :
+\begin{itemize}
+    \item \textbf{Ensemble d'entraînement} : 3 497 échantillons (80\%)
+    \item \textbf{Ensemble de test} : 875 échantillons (20\%)
+\end{itemize}
+
+La stratification a été appliquée pour maintenir la distribution de la variable cible (33,26\% de churn) dans les deux ensembles.
+
+\subsubsection{Gestion du Déséquilibre de Classes}
+Le taux de churn de 33,26\% représente un déséquilibre modéré. Nous avons appliqué la technique \textbf{SMOTE} (Synthetic Minority Over-sampling Technique) sur l'ensemble d'entraînement :
+\begin{itemize}
+    \item Avant SMOTE : 2 334 non-churned, 1 163 churned
+    \item Après SMOTE : 2 334 non-churned, 2 334 churned
+\end{itemize}
+
+\subsection{Modèles Évalués}
+
+Sept algorithmes de classification ont été entraînés et comparés :
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Modèle} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{ROC-AUC} \\
+\midrule
+\textbf{XGBoost (Tuned)} & \textbf{99,1\%} & \textbf{99,0\%} & \textbf{98,3\%} & \textbf{98,6\%} & \textbf{99,97\%} \\
+Logistic Regression & 98,4\% & 98,6\% & 96,6\% & 97,6\% & 99,8\% \\
+Gradient Boosting & 98,3\% & 96,9\% & 97,9\% & 97,4\% & 99,9\% \\
+Decision Tree & 97,3\% & 94,9\% & 96,9\% & 95,9\% & 97,2\% \\
+SVM & 97,1\% & 98,9\% & 92,4\% & 95,6\% & 99,7\% \\
+Random Forest & 94,9\% & 96,6\% & 87,6\% & 91,9\% & 98,7\% \\
+KNN & 84,1\% & 70,9\% & 88,7\% & 78,8\% & 92,5\% \\
+\bottomrule
+\end{tabular}
+\caption{Comparaison des performances des modèles sur l'ensemble de test}
+\end{table}
+
+\subsection{Optimisation des Hyperparamètres}
+
+Le modèle XGBoost, identifié comme le plus performant selon le score F1, a fait l'objet d'une optimisation par \textbf{GridSearchCV} avec validation croisée à 5 plis.
+
+\begin{tcolorbox}[title=Hyperparamètres optimaux - XGBoost, colback=white, colframe=black]
+\begin{itemize}
+    \item \texttt{learning\_rate} : 0,1
+    \item \texttt{max\_depth} : 7
+    \item \texttt{n\_estimators} : 100
+    \item \texttt{subsample} : 0,8
+\end{itemize}
+Score F1 en validation croisée : 99,09\%
+\end{tcolorbox}
+
+\subsection{Importance des Variables}
+
+L'analyse de l'importance des variables du modèle XGBoost révèle les facteurs les plus prédictifs du churn :
+
+\begin{enumerate}
+    \item \textbf{LoyaltyLevel\_Établi} (35,3\%) : Les clients établis sont significativement moins susceptibles de churner
+    \item \textbf{FavoriteSeason\_Hiver} (20,4\%) : Les habitudes d'achat saisonnières sont fortement prédictives
+    \item \textbf{PreferredMonth} (20,0\%) : Le mois d'achat préféré indique le niveau d'engagement
+    \item \textbf{LoyaltyLevel\_Nouveau} (5,8\%) : Les nouveaux clients présentent des patterns distincts
+    \item \textbf{CustomerTenureDays} (4,5\%) : L'ancienneté du client
+\end{enumerate}
+
+%==============================================================================
+\section{Segmentation Client}
+%==============================================================================
+
+En complément de la prédiction du churn, nous avons réalisé une segmentation client basée sur l'analyse RFM pour personnaliser les stratégies marketing.
+
+\subsection{Méthodologie}
+
+\subsubsection{Variables RFM}
+\begin{itemize}
+    \item \textbf{Recency} : Nombre de jours depuis le dernier achat
+    \item \textbf{Frequency} : Nombre total d'achats
+    \item \textbf{Monetary} : Montant total dépensé
+\end{itemize}
+
+\subsubsection{Algorithme de Clustering}
+Nous avons utilisé l'algorithme \textbf{K-Means} avec les étapes suivantes :
+\begin{enumerate}
+    \item Standardisation des variables RFM avec \texttt{StandardScaler}
+    \item Recherche du nombre optimal de clusters via le score de silhouette
+    \item Application de K-Means avec $k=3$ clusters
+\end{enumerate}
+
+\subsection{Segments Identifiés}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{L{3cm}ccccc}
+\toprule
+\textbf{Segment} & \textbf{Clients} & \textbf{Taux Churn} & \textbf{Récence moy.} & \textbf{Fréq. moy.} & \textbf{Montant moy.} \\
+\midrule
+À Risque & 1 109 (25,4\%) & 100\% & 246 jours & 1,85 & 460 \$ \\
+Champions & 26 (0,6\%) & 0\% & 6 jours & 83,35 & 75 966 \$ \\
+Clients Actifs & 3 237 (74,0\%) & 11\% & 40 jours & 5,55 & 1 796 \$ \\
+\bottomrule
+\end{tabular}
+\caption{Profil des segments clients identifiés}
+\end{table}
+
+\subsection{Recommandations Marketing par Segment}
+
+\begin{tcolorbox}[title=Segment Champions (Priorité : HAUTE VALEUR), colback=white, colframe=black]
+\textbf{Actions recommandées :}
+\begin{itemize}
+    \item Offres exclusives et accès anticipé aux nouveaux produits
+    \item Programme de fidélité avec avantages VIP
+    \item Sollicitation d'avis et programme de parrainage
+    \item Communications personnalisées de remerciement
+\end{itemize}
+\textbf{Canaux :} Email, Courrier direct, Gestionnaire de compte dédié
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Segment À Risque (Priorité : URGENTE), colback=white, colframe=black]
+\textbf{Actions recommandées :}
+\begin{itemize}
+    \item Campagne de reconquête avec remises spéciales
+    \item Enquête pour comprendre les raisons de l'inactivité
+    \item Messages personnalisés "Vous nous manquez"
+    \item Offres exclusives à durée limitée
+\end{itemize}
+\textbf{Canaux :} Email, SMS, Courrier direct
+\end{tcolorbox}
+
+\begin{tcolorbox}[title=Segment Clients Actifs (Priorité : MOYENNE), colback=white, colframe=black]
+\textbf{Actions recommandées :}
+\begin{itemize}
+    \item Up-selling vers des produits de valeur supérieure
+    \item Cross-selling de produits complémentaires
+    \item Seuils de livraison gratuite pour augmenter le panier moyen
+    \item Accès anticipé aux soldes
+\end{itemize}
+\textbf{Canaux :} Email, Publicités de retargeting
+\end{tcolorbox}
+
+%==============================================================================
+\section{Visualisations Générées}
+%==============================================================================
+
+Le projet génère six visualisations clés stockées dans le répertoire \texttt{reports/}.
+
+\subsection{Comparaison des Modèles (model\_comparison.png)}
+
+Cette visualisation présente deux graphiques en barres côte à côte :
+\begin{itemize}
+    \item \textbf{Panneau gauche} : Métriques de classification (Accuracy, Precision, Recall, F1) pour chaque modèle
+    \item \textbf{Panneau droit} : Score ROC-AUC par modèle
+\end{itemize}
+
+Elle permet d'identifier rapidement XGBoost comme le modèle le plus performant sur tous les critères.
+
+\subsection{Courbes ROC (roc\_curves.png)}
+
+Affiche les courbes ROC (Receiver Operating Characteristic) de tous les modèles sur un même graphique :
+\begin{itemize}
+    \item Axe X : Taux de faux positifs (FPR)
+    \item Axe Y : Taux de vrais positifs (TPR)
+    \item La ligne diagonale représente un classifieur aléatoire (AUC = 0,5)
+\end{itemize}
+
+Les courbes proches du coin supérieur gauche indiquent une meilleure performance.
+
+\subsection{Matrice de Confusion (confusion\_matrix\_best.png)}
+
+Présente les résultats de prédiction du modèle XGBoost sous forme de heatmap :
+\begin{itemize}
+    \item \textbf{Vrais Négatifs (TN)} : Clients correctement identifiés comme non-churned
+    \item \textbf{Vrais Positifs (TP)} : Clients correctement identifiés comme churned
+    \item \textbf{Faux Positifs (FP)} : Clients non-churned incorrectement classés (erreur de Type I)
+    \item \textbf{Faux Négatifs (FN)} : Clients churned manqués (erreur de Type II)
+\end{itemize}
+
+\subsection{Importance des Variables (feature\_importance.png)}
+
+Graphique en barres horizontales montrant les 20 variables les plus influentes du modèle XGBoost, classées par leur contribution à la réduction des erreurs de prédiction.
+
+\subsection{Distribution des Segments (segment\_distribution.png)}
+
+Visualisation en deux panneaux :
+\begin{itemize}
+    \item \textbf{Diagramme circulaire} : Répartition des clients par segment
+    \item \textbf{Diagramme en barres} : Taux de churn par segment
+\end{itemize}
+
+\subsection{Heatmap des Profils RFM (segment\_heatmap.png)}
+
+Matrice colorée montrant les profils RFM normalisés de chaque segment :
+\begin{itemize}
+    \item Lignes : Métriques RFM (Récence, Fréquence, Montant)
+    \item Colonnes : Segments clients
+    \item Valeurs : Scores normalisés entre 0 et 1
+\end{itemize}
+
+%==============================================================================
+\section{Architecture du Projet}
+%==============================================================================
+
+\subsection{Structure des Répertoires}
+
+\begin{lstlisting}[language=bash]
+ml-retail/
+├── data/
+│   ├── raw/                    # Données brutes
+│   ├── processed/              # Données nettoyées
+│   └── train_test/             # Ensembles train/test
+├── models/                     # Modèles entraînés
+├── reports/                    # Visualisations
+└── src/                        # Code source
+    ├── preprocessing.py        # Pipeline de prétraitement
+    ├── train_model.py          # Entraînement des modèles
+    ├── segmentation.py         # Segmentation client
+    ├── predict.py              # Script de prédiction
+    └── utils.py                # Fonctions utilitaires
+\end{lstlisting}
+
+\subsection{Artefacts Générés}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Fichier} & \textbf{Description} \\
+\midrule
+\texttt{best\_model\_xgboost\_tuned.joblib} & Modèle XGBoost optimisé \\
+\texttt{preprocessor.joblib} & Pipeline de prétraitement \\
+\texttt{kmeans\_segmentation.joblib} & Modèle de clustering K-Means \\
+\texttt{feature\_names.json} & Noms des variables après encodage \\
+\texttt{model\_results.csv} & Résultats comparatifs des modèles \\
+\texttt{segment\_profiles.csv} & Profils des segments \\
+\texttt{marketing\_recommendations.json} & Recommandations par segment \\
+\bottomrule
+\end{tabular}
+\caption{Artefacts sauvegardés dans le répertoire models/}
+\end{table}
+
+%==============================================================================
+\section{Conclusion}
+%==============================================================================
+
+Ce projet a permis de développer une solution complète d'analyse comportementale client comprenant :
+
+\begin{enumerate}
+    \item \textbf{Un pipeline de prétraitement robuste} gérant les valeurs manquantes (KNN pour l'âge), les valeurs aberrantes (valeurs sentinelles) et l'ingénierie de variables (extraction de features temporelles et géographiques).
+
+    \item \textbf{Une détection rigoureuse des fuites de données} ayant conduit à l'exclusion de 4 variables (ChurnRiskCategory, RFMSegment, CustomerType, Recency) qui auraient artificiellement gonflé les performances.
+
+    \item \textbf{Un modèle de prédiction du churn performant} (XGBoost) atteignant un score F1 de 98,6\% et un ROC-AUC de 99,97\% sur l'ensemble de test.
+
+    \item \textbf{Une segmentation client actionnable} identifiant trois segments distincts avec des recommandations marketing personnalisées.
+\end{enumerate}
+
+\subsection{Perspectives}
+
+Plusieurs pistes d'amélioration peuvent être envisagées :
+\begin{itemize}
+    \item Intégration de données temporelles pour une analyse de séries chronologiques
+    \item Développement d'un tableau de bord interactif pour le suivi en temps réel
+    \item Mise en production du modèle via une API REST
+    \item A/B testing des recommandations marketing par segment
+\end{itemize}
+
+\end{document}

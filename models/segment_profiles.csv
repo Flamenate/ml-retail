@@ -1,0 +1,4 @@
+Cluster,Recency_mean,Recency_median,Frequency_mean,Frequency_median,MonetaryTotal_mean,MonetaryTotal_median,MonetaryTotal_sum,ChurnRate,ChurnedCustomers,CustomerCount,ClusterName
+0,245.99,241.0,1.85,1.0,460.51,298.0,510703.62,1.0,1109,1109,At Risk / Churning
+1,5.92,3.0,83.35,64.5,75966.39,53489.79,1975126.07,0.0,0,26,Champions
+2,40.0,29.0,5.55,4.0,1796.18,896.66,5814236.12,0.11,345,3237,Champions
