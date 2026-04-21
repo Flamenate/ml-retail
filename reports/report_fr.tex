@@ -1,4 +1,4 @@
-\documentclass[11pt,a4paper]{article}
+\documentclass[12pt,a4paper]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[french]{babel}
@@ -25,7 +25,7 @@
 \geometry{margin=2cm}
 \pagestyle{fancy}
 \fancyhf{}
-\rhead{Atelier Machine Learning}
+\rhead{Projet Machine Learning}
 \lhead{Analyse Comportementale Clientèle}
 \rfoot{Page \thepage}
 
@@ -89,7 +89,7 @@
 \vspace{2cm}
 
 \begin{center}
-{\Huge\textbf{Atelier Machine Learning}}\par
+{\Huge\textbf{Projet Machine Learning}}\par
 \vspace{0.5cm}
 {\Large\textit{Analyse Comportementale Clientèle Retail}}\par
 
@@ -97,16 +97,16 @@
 
 {\LARGE\textbf{COMPTE RENDU}}\par
 \vspace{1cm}
-{\large Atelier Pratique : E-commerce de Cadeaux}\par
+{\large Projet : E-commerce de Cadeaux}\par
 \vspace{2cm}
-{\large \textbf{Préparé par XXXX}}
+{\large \textbf{Préparé par Haythem FRIKHA}}
 \vspace{3cm}
 
 \rule{10cm}{2pt}
 
 \vspace{5cm}
 
-{\textbf{Année Univeristaire : 2025-2026}}
+{\textbf{Année Universitaire : 2025-2026}}
 
 \end{center}
 \vfill
@@ -130,12 +130,40 @@ Ce rapport présente les travaux réalisés dans le cadre de l'atelier Machine L
 Le jeu de données mis à disposition contient \textbf{4 372 clients} décrits par \textbf{52 variables}, incluant des métriques RFM (Récence, Fréquence, Montant), des données démographiques, des comportements d'achat et des informations de compte.
 
 %==============================================================================
+\subsection{Architecture du Projet}
+%==============================================================================
+
+Une architecture logicielle bien organisée est essentielle pour la maintenabilité, la reproductibilité et le déploiement des solutions de Machine Learning. Cette sous-section détaille la structure des répertoires du projet.
+
+\subsubsection{Structure des Répertoires}
+
+Le projet suit une organisation standard pour les projets de science des données, séparant clairement les données brutes, les données traitées, le code, les modèles et les résultats.
+
+\begin{lstlisting}[language=bash]
+ml-retail/
+|-- data/
+|   |-- raw/                    # Donnees brutes
+|   |-- processed/              # Donnees nettoyees
+|   |-- train_test/             # Ensembles train/test
+|-- models/                     # Modeles entraines
+|-- reports/                    # Visualisations
+|-- src/                        # Code source
+    |-- preprocessing.py        # Pipeline de pretraitement
+    |-- train_model.py          # Entrainement des modeles
+    |-- segmentation.py         # Segmentation client
+    |-- predict.py              # Script de prediction
+    |-- utils.py                # Fonctions utilitaires
+\end{lstlisting}
+
+%==============================================================================
 \section{Prétraitement des Données}
 %==============================================================================
 
 Le prétraitement constitue une étape cruciale pour garantir la qualité des modèles. Nous avons implémenté un pipeline complet dans le fichier \texttt{src/preprocessing.py}.
 
 \subsection{Gestion des Valeurs Manquantes}
+
+Plusieurs stratégies ont été mises en place pour traiter les valeurs manquantes selon la nature de chaque variable.
 
 \subsubsection{Variable Age}
 La variable \texttt{Age} présentait \textbf{1 311 valeurs manquantes} (29,99\% du dataset). Nous avons opté pour une imputation par la méthode des \textbf{K plus proches voisins (KNN)} avec les paramètres suivants :
@@ -171,6 +199,8 @@ Ces valeurs ont été remplacées par la médiane de chaque variable respective,
 
 \subsection{Ingénierie des Variables}
 
+Afin d'améliorer la capacité prédictive du modèle, nous avons créé de nouvelles variables à partir des données brutes.
+
 \subsubsection{Date d'inscription}
 La variable \texttt{RegistrationDate} a été parsée et décomposée en quatre nouvelles variables :
 \begin{itemize}
@@ -191,6 +221,8 @@ La distribution des pays de connexion révèle une clientèle majoritairement am
 
 \subsection{Suppression des Variables Non Fiables}
 
+Certaines variables ont dû être exclues du preprocessing en raison de leur fiabilité douteuse.
+
 La variable \texttt{NewsletterSubscribed} a été supprimée car identifiée comme non fiable dans la documentation du projet.
 
 %==============================================================================
@@ -200,6 +232,8 @@ La variable \texttt{NewsletterSubscribed} a été supprimée car identifiée com
 Une analyse approfondie des corrélations entre les variables et la cible \texttt{Churn} a révélé plusieurs cas de \textbf{fuite de données} (data leakage) compromettant la validité des modèles.
 
 \subsection{Variables Exclues}
+
+Le tableau suivant récapitule les variables supprimées et les raisons de leur exclusion.
 
 \begin{table}[H]
 \centering
@@ -230,7 +264,11 @@ Cette découverte est critique car elle indique que le churn est défini comme l
 \section{Modélisation Prédictive du Churn}
 %==============================================================================
 
+Cette section détaille le processus de construction et d'évaluation de modèles de classification pour prédire le churn client. Plusieurs approches ont été mises en place, du prétraitement des données à la comparaison de sept algorithmes différents.
+
 \subsection{Préparation des Données pour la Modélisation}
+
+Avant d'entraîner les modèles, nous avons effectué plusieurs transformations essentielles sur les données.
 
 \subsubsection{Encodage des Variables}
 \begin{itemize}
@@ -248,6 +286,7 @@ Le dataset a été divisé en :
 La stratification a été appliquée pour maintenir la distribution de la variable cible (33,26\% de churn) dans les deux ensembles.
 
 \subsubsection{Gestion du Déséquilibre de Classes}
+
 Le taux de churn de 33,26\% représente un déséquilibre modéré. Nous avons appliqué la technique \textbf{SMOTE} (Synthetic Minority Over-sampling Technique) sur l'ensemble d'entraînement :
 \begin{itemize}
     \item Avant SMOTE : 2 334 non-churned, 1 163 churned
@@ -278,7 +317,7 @@ KNN & 84,1\% & 70,9\% & 88,7\% & 78,8\% & 92,5\% \\
 
 \subsection{Optimisation des Hyperparamètres}
 
-Le modèle XGBoost, identifié comme le plus performant selon le score F1, a fait l'objet d'une optimisation par \textbf{GridSearchCV} avec validation croisée à 5 plis.
+Afin d'améliorer encore les performances du modèle le plus prometteur, le modèle XGBoost, identifié comme le plus performant selon le score F1, a fait l'objet d'une optimisation par \textbf{GridSearchCV} avec validation croisée à 5 plis.
 
 \begin{tcolorbox}[title=Hyperparamètres optimaux - XGBoost, colback=white, colframe=black]
 \begin{itemize}
@@ -292,7 +331,7 @@ Score F1 en validation croisée : 99,09\%
 
 \subsection{Importance des Variables}
 
-L'analyse de l'importance des variables du modèle XGBoost révèle les facteurs les plus prédictifs du churn :
+Comprendre quels facteurs influencent le plus les prédictions du modèle est essentiel pour l'interprétabilité et l'actionabilité. L'analyse de l'importance des variables du modèle XGBoost révèle les facteurs les plus prédictifs du churn :
 
 \begin{enumerate}
     \item \textbf{LoyaltyLevel\_Établi} (35,3\%) : Les clients établis sont significativement moins susceptibles de churner
@@ -306,9 +345,11 @@ L'analyse de l'importance des variables du modèle XGBoost révèle les facteurs
 \section{Segmentation Client}
 %==============================================================================
 
-En complément de la prédiction du churn, nous avons réalisé une segmentation client basée sur l'analyse RFM pour personnaliser les stratégies marketing.
+En complément de la prédiction du churn, une approche complémentaire basée sur la segmentation client a été développée. Cette analyse RFM permet de personnaliser les stratégies marketing et d'identifier les groupes de clients ayant des besoins et des caractéristiques distincts.
 
 \subsection{Méthodologie}
+
+La segmentation a été réalisée en utilisant une approche quantitative fondée sur l'algorithme K-Means.
 
 \subsubsection{Variables RFM}
 \begin{itemize}
@@ -327,6 +368,8 @@ Nous avons utilisé l'algorithme \textbf{K-Means} avec les étapes suivantes :
 
 \subsection{Segments Identifiés}
 
+L'application de l'algorithme K-Means a révélé trois segments distincts avec des profils RFM et des taux de churn très différents.
+
 \begin{table}[H]
 \centering
 \begin{tabular}{L{3cm}ccccc}
@@ -342,6 +385,8 @@ Clients Actifs & 3 237 (74,0\%) & 11\% & 40 jours & 5,55 & 1 796 \$ \\
 \end{table}
 
 \subsection{Recommandations Marketing par Segment}
+
+Pour maximiser l'efficacité des interventions marketing, des recommandations spécifiques ont été élaborées pour chaque segment.
 
 \begin{tcolorbox}[title=Segment Champions (Priorité : HAUTE VALEUR), colback=white, colframe=black]
 \textbf{Actions recommandées :}
@@ -380,11 +425,11 @@ Clients Actifs & 3 237 (74,0\%) & 11\% & 40 jours & 5,55 & 1 796 \$ \\
 \section{Visualisations Générées}
 %==============================================================================
 
-Le projet génère six visualisations clés stockées dans le répertoire \texttt{reports/}.
+Le projet génère six visualisations clés stockées dans le répertoire \texttt{reports/}. Chaque graphique fournit des insights critiques pour comprendre la performance du modèle et le comportement client, couvrant la comparaison des modèles, l'évaluation prédictive et l'analyse des segments.
 
-\subsection{Comparaison des Modèles (model\_comparison.png)}
+\subsection{Comparaison des Modèles}
 
-Cette visualisation présente deux graphiques en barres côte à côte :
+Cette visualisation présente deux graphiques en barres côte à côte permettant une comparaison rapide des sept algorithmes :
 \begin{itemize}
     \item \textbf{Panneau gauche} : Métriques de classification (Accuracy, Precision, Recall, F1) pour chaque modèle
     \item \textbf{Panneau droit} : Score ROC-AUC par modèle
@@ -392,9 +437,9 @@ Cette visualisation présente deux graphiques en barres côte à côte :
 
 Elle permet d'identifier rapidement XGBoost comme le modèle le plus performant sur tous les critères.
 
-\subsection{Courbes ROC (roc\_curves.png)}
+\subsection{Courbes ROC}
 
-Affiche les courbes ROC (Receiver Operating Characteristic) de tous les modèles sur un même graphique :
+Au-delà des métriques de base, une analyse plus fine de la capacité discriminante des modèles est nécessaire. Les courbes ROC affichent les performances de tous les modèles sur un même graphique :
 \begin{itemize}
     \item Axe X : Taux de faux positifs (FPR)
     \item Axe Y : Taux de vrais positifs (TPR)
@@ -403,9 +448,9 @@ Affiche les courbes ROC (Receiver Operating Characteristic) de tous les modèles
 
 Les courbes proches du coin supérieur gauche indiquent une meilleure performance.
 
-\subsection{Matrice de Confusion (confusion\_matrix\_best.png)}
+\subsection{Matrice de Confusion}
 
-Présente les résultats de prédiction du modèle XGBoost sous forme de heatmap :
+Pour une compréhension granulaire des erreurs de classification du meilleur modèle, une matrice de confusion détaillée est générée. Elle présente les résultats de prédiction du modèle XGBoost sous forme de heatmap :
 \begin{itemize}
     \item \textbf{Vrais Négatifs (TN)} : Clients correctement identifiés comme non-churned
     \item \textbf{Vrais Positifs (TP)} : Clients correctement identifiés comme churned
@@ -413,21 +458,21 @@ Présente les résultats de prédiction du modèle XGBoost sous forme de heatmap
     \item \textbf{Faux Négatifs (FN)} : Clients churned manqués (erreur de Type II)
 \end{itemize}
 
-\subsection{Importance des Variables (feature\_importance.png)}
+\subsection{Importance des Variables}
 
-Graphique en barres horizontales montrant les 20 variables les plus influentes du modèle XGBoost, classées par leur contribution à la réduction des erreurs de prédiction.
+Pour comprendre les drivers du churn, une analyse de l'importance des variables est essentielle. Le graphique en barres horizontales affiche les 20 variables les plus influentes du modèle XGBoost, classées par leur contribution à la réduction des erreurs de prédiction.
 
-\subsection{Distribution des Segments (segment\_distribution.png)}
+\subsection{Distribution des Segments}
 
-Visualisation en deux panneaux :
+À l'inverse des métriques de classification, cette visualisation se concentre sur les patterns comportementaux identifiés par la segmentation. Elle présente les résultats du clustering sous deux angles :
 \begin{itemize}
     \item \textbf{Diagramme circulaire} : Répartition des clients par segment
     \item \textbf{Diagramme en barres} : Taux de churn par segment
 \end{itemize}
 
-\subsection{Heatmap des Profils RFM (segment\_heatmap.png)}
+\subsection{Heatmap des Profils RFM}
 
-Matrice colorée montrant les profils RFM normalisés de chaque segment :
+Pour synthétiser les caractéristiques distinctives de chaque segment, une heatmap normalisée offre une vue d'ensemble des profils RFM. Elle présente une matrice colorée montrant les profils RFM normalisés de chaque segment :
 \begin{itemize}
     \item Lignes : Métriques RFM (Récence, Fréquence, Montant)
     \item Colonnes : Segments clients
@@ -435,46 +480,69 @@ Matrice colorée montrant les profils RFM normalisés de chaque segment :
 \end{itemize}
 
 %==============================================================================
-\section{Architecture du Projet}
+\section{Déploiement de l'Interface Flask}
 %==============================================================================
 
-\subsection{Structure des Répertoires}
+Pour finaliser la phase de déploiement du projet, nous avons implémenté une interface basée sur Flask qui met en production le modèle de churn et les résultats de segmentation.
 
-\begin{lstlisting}[language=bash]
-ml-retail/
-├── data/
-│   ├── raw/                    # Données brutes
-│   ├── processed/              # Données nettoyées
-│   └── train_test/             # Ensembles train/test
-├── models/                     # Modèles entraînés
-├── reports/                    # Visualisations
-└── src/                        # Code source
-    ├── preprocessing.py        # Pipeline de prétraitement
-    ├── train_model.py          # Entraînement des modèles
-    ├── segmentation.py         # Segmentation client
-    ├── predict.py              # Script de prédiction
-    └── utils.py                # Fonctions utilitaires
-\end{lstlisting}
+\subsection{Objectif du Déploiement}
 
-\subsection{Artefacts Générés}
+L'objectif de cette interface est de transformer le pipeline analytique en application utilisable, afin de permettre à un utilisateur de :
+\begin{itemize}
+    \item Prédire le churn pour un client donné
+    \item Lancer un scoring en mode batch à partir du jeu de données traité
+    \item Interpréter les résultats via le niveau de risque, le segment assigné et les actions marketing recommandées
+\end{itemize}
 
-\begin{table}[H]
-\centering
-\begin{tabular}{ll}
-\toprule
-\textbf{Fichier} & \textbf{Description} \\
-\midrule
-\texttt{best\_model\_xgboost\_tuned.joblib} & Modèle XGBoost optimisé \\
-\texttt{preprocessor.joblib} & Pipeline de prétraitement \\
-\texttt{kmeans\_segmentation.joblib} & Modèle de clustering K-Means \\
-\texttt{feature\_names.json} & Noms des variables après encodage \\
-\texttt{model\_results.csv} & Résultats comparatifs des modèles \\
-\texttt{segment\_profiles.csv} & Profils des segments \\
-\texttt{marketing\_recommendations.json} & Recommandations par segment \\
-\bottomrule
-\end{tabular}
-\caption{Artefacts sauvegardés dans le répertoire models/}
-\end{table}
+\subsection{Structure Applicative Mise en Place}
+
+La couche de déploiement a été organisée dans le package \texttt{src/app/} :
+\begin{itemize}
+    \item \texttt{web.py} : routes Flask et gestion des requêtes
+    \item \texttt{services.py} : chargement des modèles, logique d'inférence, enrichissement par segmentation et calcul des résumés
+    \item \texttt{templates/} : gabarits HTML (\texttt{base.html}, \texttt{index.html})
+    \item \texttt{static/style.css} : style de l'interface
+\end{itemize}
+
+Cette organisation sépare la présentation, le routage et la logique métier, ce qui améliore la maintenabilité.
+
+\subsection{Fonctionnalités Réalisées}
+
+\subsubsection{Prédiction d'un Client}
+L'interface accepte un \texttt{CustomerID}, récupère l'enregistrement correspondant dans le dataset traité, puis affiche :
+\begin{itemize}
+    \item La probabilité de churn et la décision finale
+    \item Le niveau de risque (Low, Medium, High, Critical)
+    \item Le segment inféré à partir des variables RFM
+    \item Les recommandations marketing et canaux associés au segment
+\end{itemize}
+
+\subsubsection{Traitement Batch avec Pagination Contrôlée}
+Le workflow \textit{Process all customers} a été optimisé pour la réactivité :
+\begin{itemize}
+    \item Seuls les 100 premiers clients de \texttt{data/processed/retail\_customers\_cleaned.csv} sont scorés
+    \item Les résultats sont triés par priorité de churn croissante : Low $\rightarrow$ Medium $\rightarrow$ High $\rightarrow$ Critical
+    \item Une pagination de 10 lignes par page est appliquée avec navigation précédent/suivant
+\end{itemize}
+
+\subsubsection{Endpoints API Opérationnels}
+En complément de l'interface web, des endpoints légers ont été exposés :
+\begin{itemize}
+    \item \texttt{/health} : vérification de l'état du service
+    \item \texttt{/api/summary} : résumé du modèle et du dataset
+    \item \texttt{/api/predict} : endpoint de prédiction au format JSON
+\end{itemize}
+
+\subsection{Ajustements de l'Interface Utilisateur}
+
+Pour obtenir un rendu plus professionnel, l'interface a été ajustée avec :
+\begin{itemize}
+    \item Suppression de l'en-tête pour une mise en page plus claire
+    \item Palette de couleurs neutres (gris) en remplacement de l'accent bleu initial
+    \item Style visuel carré/bloc (sans coins arrondis)
+\end{itemize}
+
+Ces améliorations renforcent la lisibilité et la cohérence visuelle pour la démonstration du projet.
 
 %==============================================================================
 \section{Conclusion}

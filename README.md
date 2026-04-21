@@ -28,6 +28,7 @@ ml-retail/
 │   └── train_test/                   # Train/test splits
 │       ├── X_train.csv, X_test.csv
 │       └── y_train.csv, y_test.csv
+├── app/                              # Flask deployment interface
 ├── models/                           # Trained models and artifacts
 │   ├── best_model_xgboost_tuned.joblib
 │   ├── preprocessor.joblib
@@ -138,6 +139,26 @@ python src/predict.py --input new_customers.csv --output predictions.csv
 # View feature importance
 python src/predict.py --importance
 ```
+
+## Flask Deployment
+
+The deployment interface is available in the `app/` package.
+
+### Run the web app
+```bash
+pip install -r requirements.txt
+python run.py
+```
+
+Open `http://127.0.0.1:5000` in your browser.
+
+### What the interface includes
+- Customer lookup by `CustomerID`
+- Churn probability, prediction, and risk level
+- Customer segment assignment from RFM values
+- Segment-specific marketing actions and channels
+- Batch CSV scoring preview
+- JSON API endpoints for integration
 
 ## Requirements
 

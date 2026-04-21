@@ -1,2 +1,4 @@
 venv/
 project.pdf
+__build/
+__pycache__/

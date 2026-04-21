@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero p-4 p-md-5 mb-4">
+  <div class="row align-items-center g-4">
+    <div class="col-lg-8">
+      <h1 class="display-6 fw-bold mb-3">Customer churn deployment</h1>
+      <p class="lead mb-0">
+        Predict churn, assign a customer segment, and display the matching marketing actions from the trained project artifacts.
+      </p>
+    </div>
+    <div class="col-lg-4">
+      <div class="stats-pill">
+        <div class="stat-value">{{ "%.1f"|format(model_summary.f1) }}%</div>
+        <div class="stat-label">Best model F1</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card metric-card h-100">
+      <div class="card-body">
+        <div class="metric-label">Best model</div>
+        <div class="metric-value">{{ model_summary.best_model }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card metric-card h-100">
+      <div class="card-body">
+        <div class="metric-label">ROC-AUC</div>
+        <div class="metric-value">{{ "%.2f"|format(model_summary.roc_auc) }}%</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card metric-card h-100">
+      <div class="card-body">
+        <div class="metric-label">Customers</div>
+        <div class="metric-value">{{ model_summary.customer_count }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card metric-card h-100">
+      <div class="card-body">
+        <div class="metric-label">Churn rate</div>
+        <div class="metric-value">{{ "%.1f"|format(model_summary.churn_rate) }}%</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-xl-5">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h2 class="h5 mb-3">Predict a customer</h2>
+        {% if error %}
+          <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+        <form method="post" action="{{ url_for('predict') }}" class="vstack gap-3">
+          <div>
+            <label for="customer_id" class="form-label">Customer ID</label>
+            <input type="number" class="form-control" id="customer_id" name="customer_id" value="{{ customer_id }}" min="1">
+            <div class="form-text">Lookup a customer from the processed project dataset.</div>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="submit" name="action" value="single" class="btn btn-dark w-100">Run prediction</button>
+            <button type="submit" name="action" value="process_all" class="btn btn-outline-dark w-100">Process all customers</button>
+          </div>
+          <div class="form-text">Process all uses the first 100 rows from <code>data/processed/retail_customers_cleaned.csv</code>.</div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-7">
+    {% if result %}
+      <div class="card shadow-sm mb-4">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+              <h2 class="h5 mb-2">Prediction result</h2>
+              <p class="text-secondary mb-0">Customer {{ result.CustomerID }}</p>
+            </div>
+            <span class="badge text-bg-{{ 'danger' if result.RiskLevel in ['High', 'Critical'] else 'warning' if result.RiskLevel == 'Medium' else 'success' }}">
+              {{ result.RiskLevel }} risk
+            </span>
+          </div>
+
+          <div class="row g-3 mt-3">
+            <div class="col-md-4">
+              <div class="result-box">
+                <div class="result-label">Churn probability</div>
+                <div class="result-value">{{ "%.2f"|format(result.ChurnProbability * 100) }}%</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="result-box">
+                <div class="result-label">Prediction</div>
+                <div class="result-value">{{ 'Churn' if result.ChurnPrediction else 'No churn' }}</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="result-box">
+                <div class="result-label">Segment</div>
+                <div class="result-value">{{ result.Segment }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h3 class="h6 text-uppercase text-secondary">Customer profile</h3>
+              <table class="table table-sm align-middle mb-0">
+                <tbody>
+                  {% for key, value in customer_profile.items() %}
+                    <tr>
+                      <th class="text-secondary fw-normal">{{ key }}</th>
+                      <td class="text-end">{{ value }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h3 class="h6 text-uppercase text-secondary">Marketing actions</h3>
+              <p class="mb-1"><strong>Priority:</strong> {{ result.SegmentPriority }}</p>
+              <p class="mb-2">{{ result.SegmentDescription }}</p>
+              <ul class="mb-3">
+                {% for action in result.SegmentActions %}
+                  <li>{{ action }}</li>
+                {% endfor %}
+              </ul>
+              <p class="mb-1"><strong>Channels:</strong> {{ result.SegmentChannels | join(', ') }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if batch_results %}
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+              <h2 class="h5 mb-2">Batch preview</h2>
+              <p class="text-secondary mb-0">
+                {{ batch_summary.total_customers }} customers scored
+                {% if batch_pagination %}
+                  | Showing {{ batch_pagination.start_row }}-{{ batch_pagination.end_row }}
+                {% endif %}
+              </p>
+            </div>
+            <div class="small text-secondary">
+              First 100 customers only | Sorted by churn priority: Low → Medium → High → Critical
+            </div>
+          </div>
+
+          <div class="row g-3 mt-3 mb-3">
+            <div class="col-md-4">
+              <div class="result-box">
+                <div class="result-label">Predicted churn</div>
+                <div class="result-value">{{ batch_summary.predicted_churn }}</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="result-box">
+                <div class="result-label">Low/Medium/High/Critical</div>
+                <div class="result-value">{{ batch_summary.risk_levels | length }} levels</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="result-box">
+                <div class="result-label">Segments found</div>
+                <div class="result-value">{{ batch_summary.segments | length }}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-striped table-sm align-middle">
+              <thead>
+                <tr>
+                  <th>CustomerID</th>
+                  <th>ChurnProbability</th>
+                  <th>ChurnPrediction</th>
+                  <th>RiskLevel</th>
+                  <th>Segment</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in batch_results %}
+                  <tr>
+                    <td>{{ row.CustomerID }}</td>
+                    <td>{{ "%.3f"|format(row.ChurnProbability) }}</td>
+                    <td>{{ row.ChurnPrediction }}</td>
+                    <td>{{ row.RiskLevel }}</td>
+                    <td>{{ row.Segment }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          {% if batch_pagination and batch_pagination.total_pages > 1 %}
+            <div class="d-flex justify-content-between align-items-center mt-3">
+              <span class="small text-secondary">
+                Page {{ batch_pagination.page }} of {{ batch_pagination.total_pages }}
+              </span>
+              <div class="d-flex gap-2">
+                <form method="post" action="{{ url_for('predict') }}">
+                  <input type="hidden" name="action" value="process_all">
+                  <input type="hidden" name="page" value="{{ batch_pagination.prev_page }}">
+                  <button type="submit" class="btn btn-outline-dark btn-sm" {% if not batch_pagination.has_prev %}disabled{% endif %}>
+                    Previous
+                  </button>
+                </form>
+                <form method="post" action="{{ url_for('predict') }}">
+                  <input type="hidden" name="action" value="process_all">
+                  <input type="hidden" name="page" value="{{ batch_pagination.next_page }}">
+                  <button type="submit" class="btn btn-outline-dark btn-sm" {% if not batch_pagination.has_next %}disabled{% endif %}>
+                    Next
+                  </button>
+                </form>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-3 mt-4">
+  {% for segment in segments %}
+    <div class="col-md-4">
+      <div class="card segment-card h-100 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start gap-2">
+            <div>
+              <h3 class="h6 mb-1">{{ segment.name }}</h3>
+              <p class="text-secondary small mb-2">Cluster {{ segment.cluster }} | {{ segment.priority }}</p>
+            </div>
+            <span class="badge text-bg-dark">
+              {{ "%.1f"|format((segment.customer_count / model_summary.customer_count * 100) if model_summary.customer_count else 0) }}%
+            </span>
+          </div>
+          <p class="small mb-2">{{ segment.description }}</p>
+          <ul class="small mb-0">
+            <li>{{ segment.customer_count }} customers</li>
+            <li>Avg recency: {{ "%.0f"|format(segment.avg_recency) }} days</li>
+            <li>Avg frequency: {{ "%.2f"|format(segment.avg_frequency) }}</li>
+            <li>Avg monetary: {{ "%.2f"|format(segment.avg_monetary) }}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
+
