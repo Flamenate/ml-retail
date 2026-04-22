@@ -437,6 +437,13 @@ This visualization includes two side-by-side bar charts for fast comparison of t
 
 It quickly identifies XGBoost as the top-performing model across all criteria.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{model_comparison.png}
+\caption{Visual comparison of the seven models across classification metrics and ROC-AUC.}
+\label{fig:model_comparison}
+\end{figure}
+
 \subsection{ROC Curves}
 
 Beyond core metrics, a deeper view of each model's discrimination capability is needed. ROC curves display all models on the same plot:
@@ -462,6 +469,13 @@ For a granular understanding of classification errors made by the best model, a 
 
 To understand churn drivers, feature importance analysis is essential. A horizontal bar chart shows the top 20 most influential XGBoost features, ranked by their contribution to reducing prediction error.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{feature_importance.png}
+\caption{Most influential features in the XGBoost churn prediction model.}
+\label{fig:feature_importance}
+\end{figure}
+
 \subsection{Segment Distribution}
 
 Unlike classification metrics, this visualization focuses on behavioral patterns discovered through segmentation. It presents clustering outcomes from two perspectives:
@@ -469,6 +483,13 @@ Unlike classification metrics, this visualization focuses on behavioral patterns
     \item \textbf{Pie chart}: Customer distribution by segment
     \item \textbf{Bar chart}: Churn rate by segment
 \end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{segment_distribution.png}
+\caption{Customer distribution by segment and comparison of associated churn rates.}
+\label{fig:segment_distribution}
+\end{figure}
 
 \subsection{RFM Profile Heatmap}
 

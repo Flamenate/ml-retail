@@ -437,6 +437,13 @@ Cette visualisation présente deux graphiques en barres côte à côte permettan
 
 Elle permet d'identifier rapidement XGBoost comme le modèle le plus performant sur tous les critères.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{model_comparison.png}
+\caption{Comparaison visuelle des performances des 7 modèles (métriques de classification et ROC-AUC).}
+\label{fig:model_comparison}
+\end{figure}
+
 \subsection{Courbes ROC}
 
 Au-delà des métriques de base, une analyse plus fine de la capacité discriminante des modèles est nécessaire. Les courbes ROC affichent les performances de tous les modèles sur un même graphique :
@@ -462,6 +469,13 @@ Pour une compréhension granulaire des erreurs de classification du meilleur mod
 
 Pour comprendre les drivers du churn, une analyse de l'importance des variables est essentielle. Le graphique en barres horizontales affiche les 20 variables les plus influentes du modèle XGBoost, classées par leur contribution à la réduction des erreurs de prédiction.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{feature_importance.png}
+\caption{Top des variables les plus contributives dans le modèle XGBoost.}
+\label{fig:feature_importance}
+\end{figure}
+
 \subsection{Distribution des Segments}
 
 À l'inverse des métriques de classification, cette visualisation se concentre sur les patterns comportementaux identifiés par la segmentation. Elle présente les résultats du clustering sous deux angles :
@@ -469,6 +483,13 @@ Pour comprendre les drivers du churn, une analyse de l'importance des variables 
     \item \textbf{Diagramme circulaire} : Répartition des clients par segment
     \item \textbf{Diagramme en barres} : Taux de churn par segment
 \end{itemize}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{segment_distribution.png}
+\caption{Distribution des clients par segment et comparaison des taux de churn associés.}
+\label{fig:segment_distribution}
+\end{figure}
 
 \subsection{Heatmap des Profils RFM}
 
