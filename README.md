@@ -1,5 +1,9 @@
 # Machine Learning Retail - Customer Churn Prediction
 
+## Presentation Link
+https://docs.google.com/presentation/d/1a633V5Pmu1thhWUMW9V_Xp8fYqwGB-YST1WCPZoopNA/edit?usp=sharing
+(please use a @enis.tn email to access)
+
 ## Project Overview
 
 This project implements a machine learning solution for a gift e-commerce shop to:
